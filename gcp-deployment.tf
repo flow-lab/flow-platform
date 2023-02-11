@@ -113,7 +113,7 @@ resource "google_project_iam_custom_role" "terraform_state" {
 
 resource "google_service_account" "gcp_deployment_service_account" {
   account_id   = "gcp-deployment"
-  display_name = "Service Account for deployment of microservice infrastructure to GCP. User by terraform."
+  display_name = "Service Account for deployment of microservice infrastructure to GCP. Used by terraform."
 }
 
 resource "google_project_iam_binding" "binding_gcpdeployment" {

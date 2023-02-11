@@ -63,7 +63,7 @@ gcloud iam service-accounts keys create ${HOME}/.config/gcloud/flow-platform-tf-
    
 # create a bucket for terraform state, see terraform-state directory and README.md for more info 
 # terraform init
-terraform init -backend-config="bucket=flow-platform-terraform-state" -backend-config="prefix=terraform" -backend-config="credentials=${HOME}/.config/gcloud/flow-platform-tf-admin.json"
+terraform init -backend-config="bucket=${PROJECT_ID}-terraform-state" -backend-config="prefix=terraform" -backend-config="credentials=${HOME}/.config/gcloud/flow-platform-tf-admin.json"
 
 # export vars for terraform
 export TF_VAR_credentials=${HOME}/.config/gcloud/flow-platform-tf-admin.json
@@ -79,8 +79,9 @@ terraform plan
 #    step until you get no errors
 terraform apply
 
-# get credentials for kubernetes cluster
-gcloud container clusters get-credentials gke-0 --zone europe-west4-a --project ${PROJECT_ID}
+# get credentials for kubernetes cluster from terraform output and remove " around the cluster name
+export CLUSTER_NAME=$(terraform output | grep cluster_name | awk '{print $3}' | sed 's/"//g')
+gcloud container clusters get-credentials ${CLUSTER_NAME} --zone europe-west4-a --project ${PROJECT_ID}
 
 # ready to use with k9s, kubectl, helm, etc
 ```

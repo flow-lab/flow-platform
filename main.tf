@@ -86,3 +86,35 @@ module "cache" {
   authorized_network = module.gke.vpc_link
   region             = var.region
 }
+
+module "db" {
+  source             = "./db"
+  name               = "db"
+  region             = var.region
+}
+
+# ----------------------------------------------------------------------------------------------------------------------
+#  Redis Kubernetes Config
+# ----------------------------------------------------------------------------------------------------------------------
+resource "kubernetes_config_map" "redis_config" {
+  metadata {
+    name = "${module.cache.name}-config"
+  }
+
+  data = {
+    name = "projects/${var.project_id}/locations/${var.region}/instances/${module.cache.name}"
+  }
+}
+
+# ----------------------------------------------------------------------------------------------------------------------
+#  DB Kubernetes Config
+# ----------------------------------------------------------------------------------------------------------------------
+resource "kubernetes_config_map" "db_config" {
+  metadata {
+    name = "${module.db.name}-config"
+  }
+
+  data = {
+    name = "projects/${var.project_id}/locations/${var.region}/instances/${module.db.name}"
+  }
+}

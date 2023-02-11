@@ -42,3 +42,7 @@ output "client_key" {
   value     = google_container_cluster.primary.master_auth[0].client_key
   sensitive = true
 }
+
+output "cluster_name" {
+  value = google_container_cluster.primary.name
+}

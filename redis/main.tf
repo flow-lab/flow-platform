@@ -13,13 +13,12 @@ resource "google_redis_instance" "cache" {
 # ----------------------------------------------------------------------------------------------------------------------
 #  Redis Kubernetes Config
 # ----------------------------------------------------------------------------------------------------------------------
-# TODO [grokrz]: fix this, kubernetes provider is not working
-#resource "kubernetes_config_map" "redis_config" {
-#  metadata {
-#    name = "${google_redis_instance.cache.name}-config"
-#  }
-#
-#  data = {
-#    name = "projects/${google_redis_instance.cache.project}/locations/${google_redis_instance.cache.region}/instances/${google_redis_instance.cache.name}"
-#  }
-#}
+resource "kubernetes_config_map" "redis_config" {
+  metadata {
+    name = "${google_redis_instance.cache.name}-config"
+  }
+
+  data = {
+    name = "projects/${google_redis_instance.cache.project}/locations/${google_redis_instance.cache.region}/instances/${google_redis_instance.cache.name}"
+  }
+}

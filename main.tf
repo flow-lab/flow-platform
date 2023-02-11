@@ -51,13 +51,11 @@ provider "google-beta" {
   region      = var.region
 }
 
-# TODO [grokrz]: fixme
-#provider "kubernetes" {
-#  host                   = module.gke.cluster_endpoint
-#  client_key             = base64decode(module.gke.client_key)
-#  client_certificate     = base64decode(module.gke.client_certificate)
-#  cluster_ca_certificate = base64decode(module.gke.cluster_ca_certificate)
-#}
+provider "kubernetes" {
+  host                   = module.gke.cluster_endpoint
+  cluster_ca_certificate = base64decode(module.gke.cluster_ca_certificate)
+  token                  = data.google_client_config.current.access_token
+}
 
 terraform {
   backend "gcs" {

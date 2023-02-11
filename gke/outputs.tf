@@ -17,7 +17,7 @@ output "client_certificate" {
 }
 
 output "cluster_endpoint" {
-  value = google_container_cluster.primary.private_cluster_config[0].public_endpoint
+  value = google_container_cluster.primary.endpoint
 }
 
 output "service_account_key" {

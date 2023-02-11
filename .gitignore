@@ -31,3 +31,5 @@ override.tf.json
 
 # this should be usually not ignored
 .terraform.lock.hcl
+
+.idea/

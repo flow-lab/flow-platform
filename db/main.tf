@@ -11,8 +11,11 @@ resource "google_sql_database_instance" "db" {
 
   region = var.region
 
+  deletion_protection = var.tf_deletion_protection
+
   settings {
-    tier = var.db_tier
+    tier                        = var.db_tier
+    deletion_protection_enabled = var.deletion_protection_enabled
 
     ip_configuration {
       ipv4_enabled = true

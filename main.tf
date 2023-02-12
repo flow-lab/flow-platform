@@ -88,9 +88,10 @@ module "cache" {
 }
 
 module "db" {
-  source             = "./db"
-  name               = "db"
-  region             = var.region
+  source                 = "./db"
+  name                   = "db"
+  region                 = var.region
+  tf_deletion_protection = false
 }
 
 # ----------------------------------------------------------------------------------------------------------------------

@@ -12,7 +12,7 @@ variable "db_tier" {
 variable "database_version" {
   description = "The database version."
   type        = string
-  default     = "postgres_14"
+  default     = "POSTGRES_14"
 }
 
 variable "region" {

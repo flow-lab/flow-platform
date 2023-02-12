@@ -52,7 +52,7 @@ provider "google-beta" {
 }
 
 provider "kubernetes" {
-  host                   = module.gke.cluster_endpoint
+  host                   = module.gke.cluster_endpoint != "" ? "https://${module.gke.cluster_endpoint}" : ""
   cluster_ca_certificate = base64decode(module.gke.cluster_ca_certificate)
   token                  = data.google_client_config.current.access_token
 }

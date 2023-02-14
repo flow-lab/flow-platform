@@ -14,25 +14,6 @@ we are making progress towards a stable release, there may still be bugs and unf
 addressed. If you are interested in using the production-ready version, please email to kontakt@flowlab.no and
 the team will get back to you with more information.
 
-## Capabilities
-
-**Infrastructure as Code** - Infrastructure is defined as code and managed by Terraform. This allows for
-    infrastructure to be versioned and managed in the same way as application code.
-- **Continuous Delivery** - Flow Platform GCP is built on top of GitOps principles, allowing for continuous
-    delivery of applications to the platform.
-- **Security** - Flow Platform GCP is built on top of Google Cloud Platform, which provides a secure and reliable
-    infrastructure for deploying applications.
-- **Scalability** - Flow Platform GCP is built on top of Google Kubernetes Engine, which provides a scalable
-    infrastructure for deploying applications.
-- **Observability** - Flow Platform GCP is built on top of Google Cloud Platform, which provides a robust
-    observability stack for monitoring applications.
-- **Developer Experience** - Flow Platform GCP is built on top of Google Cloud Platform, which provides a
-    developer experience that is familiar to developers.
-- **Cost Optimization** - Flow Platform GCP is built on top of Google Cloud Platform, which provides a
-    cost-optimized infrastructure for deploying applications.
-- **Reliability** - Flow Platform GCP is built on top of Google Cloud Platform, which provides a reliable
-    infrastructure for deploying applications.
-
 ## Getting started
 
 ```shell

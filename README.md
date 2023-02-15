@@ -20,11 +20,11 @@ the team will get back to you with more information.
 # login to gcloud
 gcloud auth login
 
-# set project
-gcloud config set project flow-platform
-
 # set it to env var as well
 export PROJECT_ID=$(gcloud config get-value project)
+
+# set project
+gcloud config set project ${PROJECT_ID}
 
 # set zone
 gcloud config set compute/zone europe-west4-a

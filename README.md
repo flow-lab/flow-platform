@@ -39,8 +39,7 @@ gcloud projects add-iam-policy-binding ${PROJECT_ID} \
   --role roles/editor
 
 # create a key for the service account 
-gcloud iam service-accounts keys create ${HOME}/.config/gcloud/flow-platform-tf-admin.json \ 
-    --iam-account=terraform-admin@${PROJECT_ID}.iam.gserviceaccount.com
+gcloud iam service-accounts keys create ${HOME}/.config/gcloud/flow-platform-deployment.json --iam-account=gke-deployment@${PROJECT_ID}.iam.gserviceaccount.com
    
 # create a bucket for terraform state, see terraform-state directory and README.md for more info 
 # terraform init
@@ -65,6 +64,12 @@ export CLUSTER_NAME=$(terraform output | grep cluster_name | awk '{print $3}' | 
 gcloud container clusters get-credentials ${CLUSTER_NAME} --zone europe-west4-a --project ${PROJECT_ID}
 
 # ready to use with k9s, kubectl, helm, etc
+
+# generate key for gke-deployment service account for github actions
+gcloud iam service-accounts keys create ${HOME}/.config/gcloud/flow-platform-gke-deployment.json --iam-account=gke-deployment@${PROJECT_ID}.iam.gserviceaccount.com
+
+# to use in github actions use the following command to get the key into a single line string
+cat ~/.config/gcloud/flow-platform-gke-deployment.json | jq -r tostring
 ```
 
 ## License

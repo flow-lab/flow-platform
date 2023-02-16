@@ -46,3 +46,12 @@ output "client_key" {
 output "cluster_name" {
   value = google_container_cluster.primary.name
 }
+
+data "google_compute_zones" "available" {
+  region = var.region
+}
+
+output "cluster_zone" {
+  // get cluster zone
+  value = google_container_cluster.primary.location
+}

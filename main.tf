@@ -1,43 +1,8 @@
 data "google_client_config" "current" {
 }
 
-variable "prefix" {
-  default     = "flow-platform"
-  description = "Project prefix name."
-}
+data "google_project" "project" {}
 
-variable "project_id" {
-  type        = string
-  default     = "flow-platform"
-  description = "Project id."
-}
-
-variable "credentials" {
-  type        = string
-  description = "Google application credentials file path."
-}
-
-variable "region" {
-  type        = string
-  default     = "europe-west4"
-  description = "GCP default region for all resources."
-}
-
-variable "control_plane_subnetwork_cidr_block" {
-  default     = "10.0.16.0/24"
-  description = "Subnetwork's primary ip range."
-}
-
-variable "k8s_master_cidr_block" {
-  default     = "10.0.64.0/28"
-  description = "K8s master ipv4 cidr block"
-}
-
-variable "domain" {
-  description = "Base domain. Used for DNS records to point to the ingress. When empty no DNS records will be created."
-  type        = string
-  default     = ""
-}
 
 provider "google" {
   credentials = file(var.credentials)
@@ -47,7 +12,7 @@ provider "google" {
 
 provider "google-beta" {
   credentials = file(var.credentials)
-  project     = var.project_id
+  project     = data.google_project.project.project_id
   region      = var.region
 }
 
@@ -94,6 +59,17 @@ module "db" {
   tf_deletion_protection = false
 }
 
+module "gar" {
+  source = "./gar"
+  region = var.region
+  repositories = [
+    {
+      name        = "apps"
+      description = "The docker apps repository"
+    }
+  ]
+}
+
 # ----------------------------------------------------------------------------------------------------------------------
 #  Redis Kubernetes Config
 # ----------------------------------------------------------------------------------------------------------------------
@@ -103,7 +79,7 @@ resource "kubernetes_config_map" "redis_config" {
   }
 
   data = {
-    name = "projects/${var.project_id}/locations/${var.region}/instances/${module.cache.name}"
+    name = "projects/${data.google_project.project.project_id}/locations/${var.region}/instances/${module.cache.name}"
   }
 }
 
@@ -116,6 +92,6 @@ resource "kubernetes_config_map" "db_config" {
   }
 
   data = {
-    name = "projects/${var.project_id}/locations/${var.region}/instances/${module.db.name}"
+    name = "projects/${data.google_project.project.project_id}/locations/${var.region}/instances/${module.db.name}"
   }
 }

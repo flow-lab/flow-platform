@@ -1,27 +1,7 @@
-resource "google_project_iam_custom_role" "gcr_role" {
-  role_id     = "gcrwrite"
-  title       = "GCR deployment role"
-  description = "Deploy docker to GCR."
-  permissions = [
-    "resourcemanager.projects.get",
-    "storage.buckets.create",
-    "storage.buckets.get",
-    "storage.buckets.getIamPolicy",
-    "storage.buckets.list",
-    "storage.buckets.setIamPolicy",
-    "storage.objects.create",
-    "storage.objects.get",
-    "storage.objects.getIamPolicy",
-    "storage.objects.list",
-    "storage.objects.setIamPolicy",
-    "storage.objects.update"
-  ]
-}
-
 resource "google_project_iam_custom_role" "gke_role" {
   role_id     = "gkewrite"
-  title       = "GKE deployment role"
-  description = "Deploy to GKE."
+  title       = "GCE write and GKE deployment role"
+  description = "Deploy to GCR and GKE."
   permissions = [
     "container.apiServices.create",
     "container.apiServices.delete",
@@ -337,23 +317,20 @@ resource "google_project_iam_custom_role" "gke_role" {
 
 resource "google_service_account" "gke_deployment_service_account" {
   account_id   = "gke-deployment"
-  display_name = "Service Account for deployment to GKE"
-}
-
-resource "google_project_iam_binding" "binding_gcp" {
-  role    = google_project_iam_custom_role.gcr_role.id
-  project = var.project_id
-
-  members = [
-    "serviceAccount:${google_service_account.gke_deployment_service_account.email}"
-  ]
+  display_name = "Service Account for deployment to write to GCR and GKE"
 }
 
 resource "google_project_iam_binding" "binding_gke" {
   role    = google_project_iam_custom_role.gke_role.id
-  project = var.project_id
+  project = data.google_project.project.project_id
 
   members = [
     "serviceAccount:${google_service_account.gke_deployment_service_account.email}"
   ]
+}
+
+resource "google_project_iam_member" "gke" {
+  project = data.google_project.project.project_id
+  role    = "roles/artifactregistry.writer"
+  member  = "serviceAccount:${google_service_account.gke_deployment_service_account.email}"
 }

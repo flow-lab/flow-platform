@@ -137,6 +137,10 @@ resource "google_container_cluster" "primary" {
   }
 
   enable_shielded_nodes = true
+
+  vertical_pod_autoscaling {
+    enabled = true
+  }
 }
 
 resource "google_container_node_pool" "primary_node_pool" {

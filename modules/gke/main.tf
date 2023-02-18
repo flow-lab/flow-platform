@@ -1,32 +1,18 @@
 # ----------------------------------------------------------------------------------------------------------------------
 #  Networking
 # ----------------------------------------------------------------------------------------------------------------------
-
-resource "google_compute_network" "network" {
-  name                    = var.prefix
-  auto_create_subnetworks = "false"
-}
-
 resource "google_compute_subnetwork" "subnetwork" {
   name                     = "${var.prefix}-control-plane"
   region                   = var.region
-  network                  = google_compute_network.network.self_link
+  network                  = var.network_self_link
   ip_cidr_range            = var.control_plane_subnetwork_cidr_block
   private_ip_google_access = true
-}
-
-resource "google_compute_global_address" "private_ip_address" {
-  name          = "private-ip-address"
-  purpose       = "VPC_PEERING"
-  address_type  = "INTERNAL"
-  prefix_length = 16
-  network       = google_compute_network.network.id
 }
 
 resource "google_compute_router" "router" {
   name    = "${var.prefix}-control-plane-router"
   region  = google_compute_subnetwork.subnetwork.region
-  network = google_compute_network.network.self_link
+  network = var.network_self_link
 
   bgp {
     asn = 64514
@@ -42,7 +28,7 @@ resource "google_compute_router_nat" "nat" {
   source_subnetwork_ip_ranges_to_nat = "LIST_OF_SUBNETWORKS"
 
   subnetwork {
-    name = google_compute_subnetwork.subnetwork.self_link
+    name = var.network_self_link
     # range og IP that Github Actions is using
     # https://help.github.com/en/actions/automating-your-workflow-with-github-actions/virtual-environments-for-github-hosted-runners#ip-addresses-of-github-hosted-runners
     source_ip_ranges_to_nat = ["ALL_IP_RANGES"]
@@ -107,7 +93,7 @@ resource "google_container_cluster" "primary" {
   remove_default_node_pool = false
   initial_node_count       = 1
 
-  network    = google_compute_network.network.self_link
+  network    = var.network_self_link
   subnetwork = google_compute_subnetwork.subnetwork.self_link
 
   # enable client certificate authentication

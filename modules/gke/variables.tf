@@ -12,6 +12,10 @@ variable "location" {
   description = "GCP default location for all resources."
 }
 
+variable "network_self_link" {
+  description = "Network self link."
+}
+
 variable "control_plane_subnetwork_cidr_block" {
   default     = "10.0.16.0/24"
   description = "Subnetwork's primary ip range."

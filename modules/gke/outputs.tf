@@ -34,14 +34,6 @@ output "ssl_cert_link" {
   value     = google_compute_managed_ssl_certificate.api_cert.*.self_link
 }
 
-output "vpc_link" {
-  value = google_compute_network.network.self_link
-}
-
-output "network_id" {
-  value = google_compute_network.network.id
-}
-
 output "client_key" {
   value     = google_container_cluster.primary.master_auth[0].client_key
   sensitive = true
@@ -58,8 +50,4 @@ data "google_compute_zones" "available" {
 output "cluster_zone" {
   // get cluster zone
   value = google_container_cluster.primary.location
-}
-
-output "private_ip_address" {
-  value = google_compute_global_address.private_ip_address
 }

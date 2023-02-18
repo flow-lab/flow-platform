@@ -29,12 +29,20 @@ terraform {
   }
 }
 
-module "gke" {
-  source   = "../../modules/gke"
-  domain   = var.domain
+module "network" {
+  source   = "../../modules/network"
   prefix   = var.prefix
   region   = var.region
   location = "europe-west4-a"
+}
+
+module "gke" {
+  source            = "../../modules/gke"
+  prefix            = var.prefix
+  domain            = var.domain
+  region            = var.region
+  location          = "europe-west4-a"
+  network_self_link = module.network.network_self_link
 }
 
 module "ingress" {
@@ -48,20 +56,18 @@ module "ingress" {
 module "cache" {
   source             = "../../modules/redis"
   prefix             = var.prefix
-  authorized_network = module.gke.vpc_link
+  authorized_network = module.network.network_self_link
   region             = var.region
 }
 
 module "db" {
-  source                 = "../../modules/db"
-  name                   = "db"
-  region                 = var.region
-  tf_deletion_protection = false
-  # TODO: private network access
-  # authorized_network     = module.gke.network_id
-  private_ip_address      = module.gke.private_ip_address.address
-  private_ip_address_name = module.gke.private_ip_address.name
-  private_network_id      = module.gke.network_id
+  source                  = "../../modules/db"
+  name                    = "db"
+  region                  = var.region
+  tf_deletion_protection  = false
+  private_ip_address      = module.network.private_ip_address.address
+  private_ip_address_name = module.network.private_ip_address.name
+  private_network_id      = module.network.network_id
 }
 
 module "gar" {

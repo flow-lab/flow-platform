@@ -22,7 +22,7 @@ gcloud iam service-accounts create tf-admin \
 # grant the service account permission to manage GCP resources
 gcloud projects add-iam-policy-binding ${PROJECT_ID} \
   --member serviceAccount:tf-admin@${PROJECT_ID}.iam.gserviceaccount.com \
-  --role roles/editor
+  --role roles/owner
 
 # create a key for the tf-admin service account
 gcloud iam service-accounts keys create ${HOME}/.config/gcloud/${PROJECT_ID}-tf-admin.json --iam-account=tf-admin@${PROJECT_ID}.iam.gserviceaccount.com

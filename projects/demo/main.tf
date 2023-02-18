@@ -1,8 +1,5 @@
-data "google_client_config" "current" {
-}
-
+data "google_client_config" "current" {}
 data "google_project" "project" {}
-
 
 provider "google" {
   credentials = file(var.credentials)

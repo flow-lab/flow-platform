@@ -28,9 +28,7 @@ resource "google_compute_router_nat" "nat" {
   source_subnetwork_ip_ranges_to_nat = "LIST_OF_SUBNETWORKS"
 
   subnetwork {
-    name = var.network_self_link
-    # range og IP that Github Actions is using
-    # https://help.github.com/en/actions/automating-your-workflow-with-github-actions/virtual-environments-for-github-hosted-runners#ip-addresses-of-github-hosted-runners
+    name                    = google_compute_subnetwork.subnetwork.self_link
     source_ip_ranges_to_nat = ["ALL_IP_RANGES"]
   }
 

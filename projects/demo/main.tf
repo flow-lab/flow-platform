@@ -30,7 +30,7 @@ terraform {
 }
 
 module "gke" {
-  source   = "./gke"
+  source   = "../../modules/gke"
   domain   = var.domain
   prefix   = var.prefix
   region   = var.region
@@ -38,7 +38,7 @@ module "gke" {
 }
 
 module "ingress" {
-  source    = "./ingress"
+  source    = "../../modules/ingress"
   prefix    = var.prefix
   ip_name   = module.gke.gke_ingress_name
   cert_name = module.gke.ssl_cert_name
@@ -46,21 +46,23 @@ module "ingress" {
 }
 
 module "cache" {
-  source             = "./redis"
+  source             = "../../modules/redis"
   prefix             = var.prefix
   authorized_network = module.gke.vpc_link
   region             = var.region
 }
 
 module "db" {
-  source                 = "./db"
+  source                 = "../../modules/db"
   name                   = "db"
   region                 = var.region
   tf_deletion_protection = false
+  # TODO: private network access
+  # authorized_network     = module.gke.network_id
 }
 
 module "gar" {
-  source = "./gar"
+  source = "../../modules/gar"
   region = var.region
   repositories = [
     {
@@ -68,6 +70,16 @@ module "gar" {
       description = "The docker apps repository"
     }
   ]
+}
+
+# ----------------------------------------------------------------------------------------------------------------------
+#  CI/CD module
+#  NOTE: for security reasons, this needs a special permissions set on the service account for terraform
+#        to run (editor -> owner -> editor)
+# ----------------------------------------------------------------------------------------------------------------------
+module "cicd" {
+  source     = "../../modules/cicd"
+  project_id = var.project_id
 }
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -88,10 +100,40 @@ resource "kubernetes_config_map" "redis_config" {
 # ----------------------------------------------------------------------------------------------------------------------
 resource "kubernetes_config_map" "db_config" {
   metadata {
-    name = "${module.db.name}-config"
+    name = "db-config"
   }
 
   data = {
-    name = "projects/${data.google_project.project.project_id}/locations/${var.region}/instances/${module.db.name}"
+    DB_HOST                  = module.db.public_ip_address
+    DB_USER                  = module.db.db_user
+    DB_NAME                  = module.db.db_name
+    DB_PORT                  = 5432
+    INSTANCE_CONNECTION_NAME = module.db.instance_connection_name
+  }
+}
+
+resource "kubernetes_secret" "db_config" {
+  metadata {
+    name = "db-secret"
+  }
+
+  data = {
+    DB_PASS = module.db.db_password
+  }
+}
+
+# ----------------------------------------------------------------------------------------------------------------------
+#  diatom-pub Kubernetes Config
+#  https://github.com/flow-lab/diatom-pub
+# ----------------------------------------------------------------------------------------------------------------------
+resource "kubernetes_config_map" "diatom_pub_config" {
+  metadata {
+    name = "diatom-pub-config"
+  }
+
+  data = {
+    PORT       = 8080
+    REDIS_HOST = "localhost"
+    REDIS_PORT = 6379
   }
 }

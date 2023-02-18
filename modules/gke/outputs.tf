@@ -38,6 +38,10 @@ output "vpc_link" {
   value = google_compute_network.network.self_link
 }
 
+output "network_id" {
+  value = google_compute_network.network.id
+}
+
 output "client_key" {
   value     = google_container_cluster.primary.master_auth[0].client_key
   sensitive = true

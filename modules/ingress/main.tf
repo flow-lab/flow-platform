@@ -13,6 +13,7 @@ resource "kubernetes_ingress" "ingress" {
     }
   }
 
+  // TODO [grokrz]: make dynamic
   spec {
     rule {
       host = "api.${var.domain}"

@@ -132,7 +132,6 @@ resource "kubernetes_secret" "db_tls_secret" {
     "client-cert.pem" = module.db.client_cert.cert
     "client-key.pem"  = module.db.client_cert.private_key
   }
-
 }
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -145,8 +144,9 @@ resource "kubernetes_config_map" "diatom_pub_config" {
   }
 
   data = {
-    PORT       = 8080
-    REDIS_HOST = "localhost"
-    REDIS_PORT = 6379
+    PORT         = 8080
+    DB_CERT_PATH = "/etc/client-cert"
+    REDIS_HOST   = "localhost"
+    REDIS_PORT   = 6379
   }
 }

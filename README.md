@@ -24,10 +24,11 @@ the team will get back to you with more information.
     ├── prod                  <-- TBD
     .
 ├── modules                   <-- Terraform modules
-    ├── cicd                  <-- Terraform module for Continuous Integration and Continuous Delivery
+    ├── network               <-- Terraform module for VPC Network
+    ├── gar                   <-- Terraform module for GAR Google Artifact Registry
     ├── gke                   <-- Terraform module for GKE Kubernetes cluster
     ├── ingress               <-- Terraform module for Ingress Controller
-    ├── gar                   <-- Terraform module for GAR Google Artifact Registry
+    ├── cicd                  <-- Terraform module for Continuous Integration and Continuous Delivery
     ├── db                    <-- Terraform module for Cloud SQL
     ├── redis                 <-- Terraform module for Cloud Memorystore Redis
     .

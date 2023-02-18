@@ -112,14 +112,27 @@ resource "kubernetes_config_map" "db_config" {
   }
 }
 
-resource "kubernetes_secret" "db_config" {
+resource "kubernetes_secret" "db_pass_secret" {
   metadata {
-    name = "db-secret"
+    name = "db-pass-secret"
   }
 
   data = {
     DB_PASS = module.db.db_password
   }
+}
+
+resource "kubernetes_secret" "db_tls_secret" {
+  metadata {
+    name = "db-tls-secret"
+  }
+
+  data = {
+    "server-ca.pem"   = module.db.client_cert.server_ca_cert
+    "client-cert.pem" = module.db.client_cert.cert
+    "client-key.pem"  = module.db.client_cert.private_key
+  }
+
 }
 
 # ----------------------------------------------------------------------------------------------------------------------

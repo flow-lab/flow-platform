@@ -26,3 +26,7 @@ output "public_ip_address" {
 output "instance_connection_name" {
   value = google_sql_database_instance.db.connection_name
 }
+
+output "client_cert" {
+  value = google_sql_ssl_cert.client_cert
+}

@@ -140,6 +140,15 @@ resource "kubernetes_secret" "db_tls_secret" {
 }
 
 # ----------------------------------------------------------------------------------------------------------------------
+#  Add database for diatom-pub app
+# ----------------------------------------------------------------------------------------------------------------------
+resource "google_sql_database" "diatom" {
+  instance        = module.db.name
+  name            = "diatom"
+  deletion_policy = "ABANDON"
+}
+
+# ----------------------------------------------------------------------------------------------------------------------
 #  diatom-pub Kubernetes Config
 #  https://github.com/flow-lab/diatom-pub
 # ----------------------------------------------------------------------------------------------------------------------
@@ -150,7 +159,7 @@ resource "kubernetes_config_map" "diatom_pub_config" {
 
   data = {
     PORT         = 8080
-    DB_NAME      = "diatom"
+    DB_NAME      = google_sql_database.diatom.name
     DB_CERT_PATH = "/etc/client-cert"
     REDIS_HOST   = "localhost"
     REDIS_PORT   = 6379

@@ -15,6 +15,14 @@ resource "google_compute_subnetwork" "subnetwork" {
   private_ip_google_access = true
 }
 
+resource "google_compute_global_address" "private_ip_address" {
+  name          = "private-ip-address"
+  purpose       = "VPC_PEERING"
+  address_type  = "INTERNAL"
+  prefix_length = 16
+  network       = google_compute_network.network.id
+}
+
 resource "google_compute_router" "router" {
   name    = "${var.prefix}-control-plane-router"
   region  = google_compute_subnetwork.subnetwork.region

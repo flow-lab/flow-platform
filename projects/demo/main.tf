@@ -59,6 +59,9 @@ module "db" {
   tf_deletion_protection = false
   # TODO: private network access
   # authorized_network     = module.gke.network_id
+  private_ip_address      = module.gke.private_ip_address.address
+  private_ip_address_name = module.gke.private_ip_address.name
+  private_network_id      = module.gke.network_id
 }
 
 module "gar" {
@@ -104,9 +107,8 @@ resource "kubernetes_config_map" "db_config" {
   }
 
   data = {
-    DB_HOST                  = module.db.public_ip_address
+    DB_HOST                  = module.db.private_ip
     DB_USER                  = module.db.db_user
-    DB_NAME                  = module.db.db_name
     DB_PORT                  = 5432
     INSTANCE_CONNECTION_NAME = module.db.instance_connection_name
   }
@@ -145,6 +147,7 @@ resource "kubernetes_config_map" "diatom_pub_config" {
 
   data = {
     PORT         = 8080
+    DB_NAME      = "diatom"
     DB_CERT_PATH = "/etc/client-cert"
     REDIS_HOST   = "localhost"
     REDIS_PORT   = 6379

@@ -59,3 +59,7 @@ output "cluster_zone" {
   // get cluster zone
   value = google_container_cluster.primary.location
 }
+
+output "private_ip_address" {
+  value = google_compute_global_address.private_ip_address
+}

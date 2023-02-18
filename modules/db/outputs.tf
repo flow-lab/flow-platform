@@ -19,8 +19,8 @@ output "db_name" {
   value = local.db_name
 }
 
-output "public_ip_address" {
-  value = google_sql_database_instance.db.public_ip_address
+output "private_ip" {
+  value = google_sql_database_instance.db.private_ip_address
 }
 
 output "instance_connection_name" {

@@ -1,11 +1,11 @@
 # ----------------------------------------------------------------------------------------------------------------------
 #  DB
 # ----------------------------------------------------------------------------------------------------------------------
-
 locals {
   db_name = "${var.name}-${random_id.db_name_suffix.hex}"
   db_user = "root"
 }
+
 resource "random_id" "db_name_suffix" {
   byte_length = 4
 }
@@ -34,7 +34,20 @@ resource "google_secret_manager_secret_version" "db_password" {
   secret_data = random_password.db_password.result
 }
 
+variable "private_ip_address" {
+}
+variable "private_ip_address_name" {
+}
+resource "google_service_networking_connection" "private_vpc_connection" {
+  network                 = var.private_network_id
+  service                 = "servicenetworking.googleapis.com"
+  reserved_peering_ranges = [var.private_ip_address_name]
+}
 
+// TODO [grokrz]: clean up
+variable "private_network_id" {
+  default = ""
+}
 resource "google_sql_database_instance" "db" {
   name             = local.db_name
   database_version = var.database_version
@@ -48,10 +61,13 @@ resource "google_sql_database_instance" "db" {
     deletion_protection_enabled = var.deletion_protection_enabled
 
     ip_configuration {
-      ipv4_enabled = true
-      require_ssl  = true
+      ipv4_enabled                                  = false
+      private_network                               = var.private_network_id
+      enable_private_path_for_google_cloud_services = true
+      require_ssl                                   = true
     }
   }
+  depends_on = [google_service_networking_connection.private_vpc_connection]
 }
 
 resource "google_sql_ssl_cert" "client_cert" {

@@ -51,3 +51,7 @@ output "cluster_zone" {
   // get cluster zone
   value = google_container_cluster.primary.location
 }
+
+output "google_compute_global_address" {
+  value = google_compute_global_address.ip
+}

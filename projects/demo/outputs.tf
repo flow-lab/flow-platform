@@ -26,3 +26,7 @@ locals {
 output "github_actions_env_cfg" {
   value = local.repositories
 }
+
+output "global_static_ip" {
+  value = module.gke.google_compute_global_address
+}

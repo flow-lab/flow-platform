@@ -68,8 +68,8 @@ module "db" {
 }
 
 module "gar" {
-  source = "../../modules/gar"
-  region = var.region
+  source       = "../../modules/gar"
+  region       = var.region
   repositories = [
     {
       name        = "apps"
@@ -163,5 +163,33 @@ resource "kubernetes_config_map" "diatom_pub_config" {
     DB_CERT_PATH = "/etc/client-cert"
     REDIS_HOST   = "localhost"
     REDIS_PORT   = 6379
+  }
+}
+
+# init db container using flowdber
+resource "kubernetes_config_map" "diatom_pub_flowdber_config" {
+  metadata {
+    name = "diatom-pub-flowdber-config"
+  }
+
+  data = {
+    DB_NAME      = google_sql_database.diatom.name
+    DB_CERT_PATH = "/etc/client-cert"
+  }
+}
+
+locals {
+  config_dir    = "${path.module}/diatom-pub/sql"
+}
+
+# read file from local disk
+resource "kubernetes_config_map" "diatom_pub_sql_files" {
+  metadata {
+    name = "diatom-pub-sql-files"
+  }
+
+  data =  {
+    for f in fileset(local.config_dir, "**/*.sql") :
+    f => file("${local.config_dir}/${f}")
   }
 }

@@ -50,12 +50,12 @@ module "ingress" {
   domain    = var.domain
 }
 
-module "cache" {
-  source             = "../../modules/redis"
-  prefix             = var.prefix
-  authorized_network = module.network.network_self_link
-  region             = var.region
-}
+#module "cache" {
+#  source             = "../../modules/redis"
+#  prefix             = var.prefix
+#  authorized_network = module.network.network_self_link
+#  region             = var.region
+#}
 
 module "db" {
   source                  = "../../modules/db"
@@ -91,15 +91,15 @@ module "cicd" {
 # ----------------------------------------------------------------------------------------------------------------------
 #  Redis Kubernetes Config
 # ----------------------------------------------------------------------------------------------------------------------
-resource "kubernetes_config_map" "redis_config" {
-  metadata {
-    name = "${module.cache.name}-config"
-  }
-
-  data = {
-    name = "projects/${data.google_project.project.project_id}/locations/${var.region}/instances/${module.cache.name}"
-  }
-}
+#resource "kubernetes_config_map" "redis_config" {
+#  metadata {
+#    name = "${module.cache.name}-config"
+#  }
+#
+#  data = {
+#    name = "projects/${data.google_project.project.project_id}/locations/${var.region}/instances/${module.cache.name}"
+#  }
+#}
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  DB Kubernetes Config

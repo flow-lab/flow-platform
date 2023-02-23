@@ -83,7 +83,7 @@ resource "google_container_cluster" "primary" {
   name               = "${var.prefix}-cluster"
   location           = var.location
   provider           = google
-  min_master_version = "1.25.6-gke.200"
+  min_master_version = "1.25.6-gke.1000"
 
   # We can't create a cluster with no node pool defined, but we want to only use
   # separately managed node pools. So we create the smallest possible default

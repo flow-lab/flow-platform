@@ -178,18 +178,6 @@ resource "kubernetes_config_map" "diatom_pub_flowdber_config" {
   }
 }
 
-locals {
-  config_dir    = "${path.module}/diatom-pub/sql"
-}
-
-# read file from local disk
-resource "kubernetes_config_map" "diatom_pub_sql_files" {
-  metadata {
-    name = "diatom-pub-sql-files"
-  }
-
-  data =  {
-    for f in fileset(local.config_dir, "**/*.sql") :
-    f => file("${local.config_dir}/${f}")
-  }
+module "diatom-pub-sql" {
+  source       = "git::https://github.com/flow-lab/diatom-pub.git//srv/module/infra?ref=main"
 }

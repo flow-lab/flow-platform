@@ -53,7 +53,7 @@ resource "google_compute_managed_ssl_certificate" "api_cert" {
 
 # Configure A record pointing to this IP address
 resource "google_compute_global_address" "ip" {
-  name = "${var.prefix}-load-balancer"
+  name = "${var.prefix}-lb-ip"
 }
 
 resource "google_dns_managed_zone" "prod" {
@@ -80,19 +80,12 @@ resource "google_dns_record_set" "dns" {
 # ----------------------------------------------------------------------------------------------------------------------
 
 resource "google_container_cluster" "primary" {
-  name               = "${var.prefix}-cluster"
-  location           = var.location
-  provider           = google
-  min_master_version = "1.25.6-gke.1000"
+  name     = "${var.prefix}-cluster"
+  location = var.location
 
-  # We can't create a cluster with no node pool defined, but we want to only use
-  # separately managed node pools. So we create the smallest possible default
-  # node pool and immediately delete it.
-  remove_default_node_pool = false
-  initial_node_count       = 1
-
-  network    = var.network_self_link
-  subnetwork = google_compute_subnetwork.subnetwork.self_link
+  network          = var.network_self_link
+  subnetwork       = google_compute_subnetwork.subnetwork.self_link
+  enable_autopilot = true
 
   # enable client certificate authentication
   master_auth {
@@ -128,163 +121,161 @@ resource "google_container_cluster" "primary" {
     }
   }
 
-  enable_shielded_nodes = true
-
   vertical_pod_autoscaling {
     enabled = true
   }
 }
 
-resource "google_container_node_pool" "primary_node_pool" {
-  name               = "standard"
-  location           = var.location
-  cluster            = google_container_cluster.primary.name
-  initial_node_count = 1
-  provider           = google-beta
+#resource "google_container_node_pool" "primary_node_pool" {
+#  name               = "standard"
+#  location           = var.location
+#  cluster            = google_container_cluster.primary.name
+#  initial_node_count = 1
+#  provider           = google-beta
+#
+#  autoscaling {
+#    max_node_count = 3
+#    min_node_count = 1
+#  }
+#
+#  management {
+#    auto_repair  = true
+#    auto_upgrade = true
+#  }
+#
+#  node_config {
+#    preemptible  = true
+#    machine_type = "n2-standard-2"
+#
+#    labels = {
+#      nodetype = "standard"
+#    }
+#
+#    metadata = {
+#      disable-legacy-endpoints = "true"
+#    }
+#
+#    oauth_scopes = [
+#      "https://www.googleapis.com/auth/logging.write",
+#      "https://www.googleapis.com/auth/monitoring",
+#      "https://www.googleapis.com/auth/devstorage.read_only"
+#    ]
+#  }
+#
+#  upgrade_settings {
+#    max_surge       = 2
+#    max_unavailable = 0
+#  }
+#
+#  lifecycle {
+#    create_before_destroy = true
+#  }
+#}
 
-  autoscaling {
-    max_node_count = 3
-    min_node_count = 1
-  }
+#resource "google_container_node_pool" "highmem_node_pool" {
+#  count              = var.highmem_node_pool ? 1 : 0
+#  name_prefix        = "highmem-"
+#  location           = var.location
+#  cluster            = google_container_cluster.primary.name
+#  initial_node_count = 1
+#  provider           = google-beta
+#
+#  autoscaling {
+#    max_node_count = 3
+#    min_node_count = 0
+#  }
+#
+#  management {
+#    auto_repair  = true
+#    auto_upgrade = true
+#  }
+#
+#  node_config {
+#    preemptible  = true
+#    machine_type = "n2-highmem-4"
+#
+#    labels = {
+#      nodetype = "highmem"
+#    }
+#
+#    metadata = {
+#      disable-legacy-endpoints = "true"
+#    }
+#
+#    oauth_scopes = [
+#      "https://www.googleapis.com/auth/logging.write",
+#      "https://www.googleapis.com/auth/monitoring",
+#      "https://www.googleapis.com/auth/devstorage.read_only"
+#    ]
+#
+#    tags = ["mem"]
+#  }
+#
+#  upgrade_settings {
+#    max_surge       = 2
+#    max_unavailable = 0
+#  }
+#
+#  lifecycle {
+#    create_before_destroy = true
+#  }
+#}
 
-  management {
-    auto_repair  = true
-    auto_upgrade = true
-  }
-
-  node_config {
-    preemptible  = true
-    machine_type = "n2-standard-2"
-
-    labels = {
-      nodetype = "standard"
-    }
-
-    metadata = {
-      disable-legacy-endpoints = "true"
-    }
-
-    oauth_scopes = [
-      "https://www.googleapis.com/auth/logging.write",
-      "https://www.googleapis.com/auth/monitoring",
-      "https://www.googleapis.com/auth/devstorage.read_only"
-    ]
-  }
-
-  upgrade_settings {
-    max_surge       = 2
-    max_unavailable = 0
-  }
-
-  lifecycle {
-    create_before_destroy = true
-  }
-}
-
-resource "google_container_node_pool" "highmem_node_pool" {
-  count              = var.highmem_node_pool ? 1 : 0
-  name_prefix        = "highmem-"
-  location           = var.location
-  cluster            = google_container_cluster.primary.name
-  initial_node_count = 1
-  provider           = google-beta
-
-  autoscaling {
-    max_node_count = 3
-    min_node_count = 0
-  }
-
-  management {
-    auto_repair  = true
-    auto_upgrade = true
-  }
-
-  node_config {
-    preemptible  = true
-    machine_type = "n2-highmem-4"
-
-    labels = {
-      nodetype = "highmem"
-    }
-
-    metadata = {
-      disable-legacy-endpoints = "true"
-    }
-
-    oauth_scopes = [
-      "https://www.googleapis.com/auth/logging.write",
-      "https://www.googleapis.com/auth/monitoring",
-      "https://www.googleapis.com/auth/devstorage.read_only"
-    ]
-
-    tags = ["mem"]
-  }
-
-  upgrade_settings {
-    max_surge       = 2
-    max_unavailable = 0
-  }
-
-  lifecycle {
-    create_before_destroy = true
-  }
-}
-
-resource "google_container_node_pool" "gpu_node_pool" {
-  count              = var.gpu_node_pool ? 1 : 0
-  name_prefix        = "gpu-"
-  location           = var.location
-  cluster            = google_container_cluster.primary.name
-  initial_node_count = 1
-  provider           = google-beta
-
-  autoscaling {
-    max_node_count = 1
-    min_node_count = 0
-  }
-
-  management {
-    auto_repair  = true
-    auto_upgrade = true
-  }
-
-  node_config {
-    preemptible  = true
-    machine_type = "n1-standard-1"
-
-    labels = {
-      nodetype    = "gpu"
-      accelerator = "nvidia-tesla-v100"
-    }
-
-    metadata = {
-      disable-legacy-endpoints = "true"
-    }
-
-    guest_accelerator {
-      count = 1
-      type  = "nvidia-tesla-v100"
-    }
-
-    oauth_scopes = [
-      "https://www.googleapis.com/auth/logging.write",
-      "https://www.googleapis.com/auth/monitoring",
-      "https://www.googleapis.com/auth/devstorage.read_only"
-    ]
-
-    tags = ["gpu"]
-  }
-
-  upgrade_settings {
-    max_surge       = 2
-    max_unavailable = 0
-  }
-
-  lifecycle {
-    create_before_destroy = true
-  }
-
-}
+#resource "google_container_node_pool" "gpu_node_pool" {
+#  count              = var.gpu_node_pool ? 1 : 0
+#  name_prefix        = "gpu-"
+#  location           = var.location
+#  cluster            = google_container_cluster.primary.name
+#  initial_node_count = 1
+#  provider           = google-beta
+#
+#  autoscaling {
+#    max_node_count = 1
+#    min_node_count = 0
+#  }
+#
+#  management {
+#    auto_repair  = true
+#    auto_upgrade = true
+#  }
+#
+#  node_config {
+#    preemptible  = true
+#    machine_type = "n1-standard-1"
+#
+#    labels = {
+#      nodetype    = "gpu"
+#      accelerator = "nvidia-tesla-v100"
+#    }
+#
+#    metadata = {
+#      disable-legacy-endpoints = "true"
+#    }
+#
+#    guest_accelerator {
+#      count = 1
+#      type  = "nvidia-tesla-v100"
+#    }
+#
+#    oauth_scopes = [
+#      "https://www.googleapis.com/auth/logging.write",
+#      "https://www.googleapis.com/auth/monitoring",
+#      "https://www.googleapis.com/auth/devstorage.read_only"
+#    ]
+#
+#    tags = ["gpu"]
+#  }
+#
+#  upgrade_settings {
+#    max_surge       = 2
+#    max_unavailable = 0
+#  }
+#
+#  lifecycle {
+#    create_before_destroy = true
+#  }
+#
+#}
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Service Account

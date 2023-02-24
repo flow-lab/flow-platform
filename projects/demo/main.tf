@@ -38,7 +38,7 @@ module "gke" {
   prefix            = var.prefix
   domain            = var.domain
   region            = var.region
-  location          = "europe-west4-a"
+  location          = "europe-west4"
   network_self_link = module.network.network_self_link
 }
 
@@ -68,8 +68,8 @@ module "db" {
 }
 
 module "gar" {
-  source       = "../../modules/gar"
-  region       = var.region
+  source = "../../modules/gar"
+  region = var.region
   repositories = [
     {
       name        = "apps"
@@ -180,5 +180,5 @@ resource "kubernetes_config_map" "diatom_pub_flowdber_config" {
 }
 
 module "diatom-pub-sql" {
-  source       = "git::https://github.com/flow-lab/diatom-pub.git//srv/module/infra?ref=main"
+  source = "git::https://github.com/flow-lab/diatom-pub.git//srv/module/infra?ref=main"
 }

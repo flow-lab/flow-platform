@@ -24,9 +24,10 @@ resource "google_secret_manager_secret" "db_password" {
 }
 
 resource "google_sql_user" "users" {
-  name     = local.db_user
-  instance = google_sql_database_instance.db.name
-  password = google_secret_manager_secret_version.db_password.secret_data
+  name            = local.db_user
+  instance        = google_sql_database_instance.db.name
+  password        = google_secret_manager_secret_version.db_password.secret_data
+  deletion_policy = "ABANDON"
 }
 
 resource "google_secret_manager_secret_version" "db_password" {

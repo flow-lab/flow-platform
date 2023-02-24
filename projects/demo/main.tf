@@ -163,6 +163,7 @@ resource "kubernetes_config_map" "diatom_pub_config" {
     DB_CERT_PATH = "/etc/client-cert"
     REDIS_HOST   = "localhost"
     REDIS_PORT   = 6379
+    LOG_LEVEL    = "debug"
   }
 }
 

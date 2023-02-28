@@ -182,3 +182,10 @@ resource "kubernetes_config_map" "diatom_pub_flowdber_config" {
 module "diatom-pub-sql" {
   source = "git::https://github.com/flow-lab/diatom-pub.git//srv/module/infra?ref=main"
 }
+
+module "bucket" {
+  source      = "../../modules/bucket"
+  name_prefix = "flow-platform"
+  location    = var.region
+  project     = var.project_id
+}

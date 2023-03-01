@@ -179,13 +179,39 @@ resource "kubernetes_config_map" "diatom_pub_flowdber_config" {
   }
 }
 
-module "diatom-pub-sql" {
+module "diatom_pub_sql" {
   source = "git::https://github.com/flow-lab/diatom-pub.git//srv/module/infra?ref=main"
 }
 
-module "bucket" {
+module "ml_data_bucket" {
   source      = "../../modules/bucket"
-  name_prefix = "flow-platform"
+  name_prefix = "ml-data"
   location    = var.region
   project     = var.project_id
+}
+
+module "ml_pipeline_bucket" {
+  source      = "../../modules/bucket"
+  name_prefix = "ml-pipeline"
+  location    = var.region
+  project     = var.project_id
+}
+
+data "google_compute_default_service_account" "compute" {
+  project = var.project_id
+}
+
+# Google Vertex AI requires the following permissions:
+resource "google_storage_bucket_iam_binding" "bucket" {
+  bucket = module.ml_pipeline_bucket.name
+  role   = "roles/storage.objectCreator"
+  members = [
+    "serviceAccount:${data.google_compute_default_service_account.compute.email}",
+  ]
+}
+
+resource "google_storage_bucket_iam_member" "bucket" {
+  bucket = module.ml_pipeline_bucket.name
+  role   = "roles/storage.objectViewer"
+  member = "serviceAccount:${data.google_compute_default_service_account.compute.email}"
 }

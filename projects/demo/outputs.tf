@@ -30,3 +30,7 @@ output "github_actions_env_cfg" {
 output "global_static_ip" {
   value = module.gke.google_compute_global_address
 }
+
+output "default_compute_sa" {
+  value = data.google_compute_default_service_account.compute
+}

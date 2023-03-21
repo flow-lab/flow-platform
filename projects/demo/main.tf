@@ -201,8 +201,7 @@ data "google_compute_default_service_account" "compute" {
   project = var.project_id
 }
 
-# Google Vertex AI requires the following permissions:
-resource "google_storage_bucket_iam_binding" "bucket" {
+resource "google_storage_bucket_iam_binding" "ml_pipeline_bucket_creator" {
   bucket = module.ml_pipeline_bucket.name
   role   = "roles/storage.objectCreator"
   members = [
@@ -210,8 +209,138 @@ resource "google_storage_bucket_iam_binding" "bucket" {
   ]
 }
 
-resource "google_storage_bucket_iam_member" "bucket" {
+resource "google_storage_bucket_iam_member" "ml_pipeline_bucket_creator" {
+  bucket = module.ml_pipeline_bucket.name
+  role   = "roles/storage.objectCreator"
+  member = "serviceAccount:${data.google_compute_default_service_account.compute.email}"
+}
+
+resource "google_storage_bucket_iam_binding" "ml_pipeline_bucket_viewer" {
+  bucket = module.ml_pipeline_bucket.name
+  role   = "roles/storage.objectViewer"
+  members = [
+    "serviceAccount:${data.google_compute_default_service_account.compute.email}",
+  ]
+}
+
+resource "google_storage_bucket_iam_member" "ml_pipeline_bucket_viewer" {
   bucket = module.ml_pipeline_bucket.name
   role   = "roles/storage.objectViewer"
   member = "serviceAccount:${data.google_compute_default_service_account.compute.email}"
+}
+
+resource "google_project_iam_member" "dataflow_worker" {
+  project = var.project_id
+  role    = "roles/dataflow.worker"
+  member  = "serviceAccount:${data.google_compute_default_service_account.compute.email}"
+}
+
+resource "google_project_iam_member" "dataflow_admin" {
+  project = var.project_id
+  role    = "roles/dataflow.admin"
+  member  = "serviceAccount:${data.google_compute_default_service_account.compute.email}"
+}
+
+resource "google_project_iam_member" "storage_object_admin" {
+  project = var.project_id
+  role    = "roles/storage.objectAdmin"
+  member  = "serviceAccount:${data.google_compute_default_service_account.compute.email}"
+}
+
+resource "google_project_iam_member" "storage_admin" {
+  project = var.project_id
+  role    = "roles/storage.admin"
+  member  = "serviceAccount:${data.google_compute_default_service_account.compute.email}"
+}
+
+resource "google_project_iam_member" "bigquery_data_editor" {
+  project = var.project_id
+  role    = "roles/bigquery.dataEditor"
+  member  = "serviceAccount:${data.google_compute_default_service_account.compute.email}"
+}
+
+resource "google_project_iam_member" "dataflow_developer" {
+  project = var.project_id
+  role    = "roles/dataflow.developer"
+  member  = "serviceAccount:${data.google_compute_default_service_account.compute.email}"
+}
+
+resource "google_project_iam_member" "vertex_ai_user" {
+  project = var.project_id
+  role    = "roles/aiplatform.user"
+  member  = "serviceAccount:${data.google_compute_default_service_account.compute.email}"
+}
+
+resource "google_project_iam_member" "artifact_registry_writer" {
+  project = var.project_id
+  role    = "roles/artifactregistry.writer"
+  member  = "serviceAccount:${data.google_compute_default_service_account.compute.email}"
+}
+
+resource "google_project_iam_member" "artifact_registry_reader" {
+  project = var.project_id
+  role    = "roles/artifactregistry.reader"
+  member  = "serviceAccount:${data.google_compute_default_service_account.compute.email}"
+}
+
+resource "google_project_iam_member" "service_account_user" {
+  project = var.project_id
+  role    = "roles/iam.serviceAccountUser"
+  member  = "serviceAccount:${data.google_compute_default_service_account.compute.email}"
+}
+
+resource "google_project_service" "compute_engine" {
+  service = "compute.googleapis.com"
+}
+
+resource "google_project_service" "logging" {
+  service = "logging.googleapis.com"
+}
+
+resource "google_project_service" "storage" {
+  service = "storage.googleapis.com"
+}
+
+resource "google_project_service" "storage_api" {
+  service = "storage-api.googleapis.com"
+}
+
+resource "google_project_service" "bigquery" {
+  service = "bigquery.googleapis.com"
+}
+
+resource "google_project_service" "poubsub" {
+  service = "pubsub.googleapis.com"
+}
+
+resource "google_project_service" "datastore" {
+  service = "datastore.googleapis.com"
+}
+
+resource "google_project_service" "cloudresourcemanager" {
+  service = "cloudresourcemanager.googleapis.com"
+}
+
+resource "google_project_service" "cloud_scheduler" {
+  service = "cloudscheduler.googleapis.com"
+}
+
+resource "google_project_service" "data_pipeline" {
+  service = "datapipelines.googleapis.com"
+}
+
+resource "google_project_service" "autoscaling" {
+  service = "autoscaling.googleapis.com"
+}
+
+resource "google_project_service" "data_catalog" {
+  service = "datacatalog.googleapis.com"
+}
+
+resource "google_project_service" "ai_platform" {
+  service = "ml.googleapis.com"
+}
+
+resource "google_project_service" "dataflow" {
+  service = "dataflow.googleapis.com"
 }

@@ -1,5 +1,10 @@
+NAME=redis-stack
+TIMEOUT=600s
+REPLICAS=${REPLICAS:-1}
+
 # CREDITS: https://medium.com/@gerkElznik/deploy-redis-stack-using-bitnamis-helm-chart-d8339453352c
-REDIS_PASSWORD=$(kubectl get secret --namespace default redis-stack-server -o jsonpath="{.data.redis-password}" 2>/dev/null | base64 -d)
+# prevents to override the password if it already exists
+REDIS_PASSWORD=$(kubectl get secret --namespace default ${NAME} -o jsonpath="{.data.redis-password}" 2>/dev/null | base64 -d)
 if [[ -z "$REDIS_PASSWORD" ]]; then
     REDIS_PASSWORD=$(openssl rand -hex 16)
     echo "Secret not found. Generated password."
@@ -8,10 +13,11 @@ else
 fi
 
 helm upgrade -i \
-  redis-stack-server redis \
+  ${NAME} redis \
   --atomic \
   --repo https://charts.bitnami.com/bitnami \
   --version 17.1.4 \
+  --timeout ${TIMEOUT} \
   --values - <<EOF
 global:
   redis:
@@ -26,28 +32,43 @@ master:
   extraVolumes:
     - name: merged-start-scripts
       configMap:
-        name: bitnami-redis-stack-server-merged
+        name: ${NAME}-merged
         defaultMode: 0755
   extraVolumeMounts:
     - name: merged-start-scripts
       mountPath: /opt/bitnami/scripts/merged-start-scripts
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
 replica:
   args:
     - -c
     - /opt/bitnami/scripts/merged-start-scripts/start-replica.sh
+  replicaCount: ${REPLICAS}
   extraVolumes:
     - name: merged-start-scripts
       configMap:
-        name: bitnami-redis-stack-server-merged
+        name: ${NAME}-merged
         defaultMode: 0755
   extraVolumeMounts:
     - name: merged-start-scripts
       mountPath: /opt/bitnami/scripts/merged-start-scripts
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
 extraDeploy:
   - apiVersion: v1
     kind: ConfigMap
     metadata:
-      name: bitnami-redis-stack-server-merged
+      name: ${NAME}-merged
     data:
       start-master.sh: |
         #!/usr/bin/dumb-init /bin/bash

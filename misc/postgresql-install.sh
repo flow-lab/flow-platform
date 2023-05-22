@@ -1,17 +1,17 @@
-NAME=postgresql
+NAME=db-postgresql
 TIMEOUT=600s
 
 DB_NAME=${DB_NAME:-diatom}
 
 # create an app user secret if it doesn't exist
-SECRET_EXISTS=$(kubectl get secrets | grep "^${NAME}-user")
+SECRET_EXISTS=$(kubectl get secrets | grep "^${NAME}")
 if [ -z "${SECRET_EXISTS}" ]; then
-  kubectl create secret generic ${NAME}-user \
+  kubectl create secret generic ${NAME} \
     --from-literal=postgres-password="$(openssl rand -hex 16)" \
     --from-literal=PASS="$(openssl rand -hex 16)" \
     --dry-run=client -o yaml | kubectl apply -f -
 else
-  echo "Secret ${NAME}-user already exists. Not overwriting."
+  echo "Secret ${NAME} already exists. Not overwriting."
 fi
 
 helm upgrade -i \
@@ -24,7 +24,7 @@ helm upgrade -i \
 auth:
   database: ${DB_NAME}
   username: ${DB_NAME}
-  existingSecret: "${NAME}-user"
+  existingSecret: "${NAME}"
   secretKeys:
     userPasswordKey: "PASS"
 EOF

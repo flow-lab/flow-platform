@@ -19,6 +19,7 @@ the team will get back to you with more information.
 ```
 .
 ├── README.md                 <-- This file
+├── misc                      <-- Misc files, helm charts, etc
 ├── projects                  <-- Projects that use this repo
     ├── demo                  <-- The demo project, see README.md for more info
     ├── prod                  <-- TBD

@@ -2,13 +2,15 @@ NAME=db-postgresql
 TIMEOUT=600s
 
 DB_NAME=${DB_NAME:-diatom}
+DB_USER=${DB_NAME} # default to the same as DB_NAME
+DB_PORT=${DB_PORT:-5432}
 
 # create an app user secret if it doesn't exist
 SECRET_EXISTS=$(kubectl get secrets | grep "^${NAME}")
 if [ -z "${SECRET_EXISTS}" ]; then
   kubectl create secret generic ${NAME} \
     --from-literal=postgres-password="$(openssl rand -hex 16)" \
-    --from-literal=PASS="$(openssl rand -hex 16)" \
+    --from-literal=DB_PASS="$(openssl rand -hex 16)" \
     --dry-run=client -o yaml | kubectl apply -f -
 else
   echo "Secret ${NAME} already exists. Not overwriting."
@@ -23,17 +25,18 @@ helm upgrade -i \
   --values - <<EOF
 auth:
   database: ${DB_NAME}
-  username: ${DB_NAME}
+  username: ${DB_USER}
   existingSecret: "${NAME}"
   secretKeys:
-    userPasswordKey: "PASS"
+    userPasswordKey: "DB_PASS"
 EOF
 
 # create configmap for HOST and USERNAME
 kubectl create configmap ${NAME}-config \
-  --from-literal=HOST="${NAME}.default.svc.cluster.local" \
-  --from-literal=NAME="${DB_NAME}" \
-  --from-literal=USER="${DB_NAME}" \
+  --from-literal=DB_HOST="${NAME}.default.svc.cluster.local" \
+  --from-literal=DB_NAME="${DB_NAME}" \
+  --from-literal=DB_USER="${DB_USER}" \
+  --from-literal=DB_PORT="${DB_PORT}" \
   --dry-run=client -o yaml | kubectl apply -f -
 
 # ** Please be patient while the chart is being deployed **

@@ -17,6 +17,7 @@ locals {
         DEPLOYMENT_NAME = replace(replace("\\$github.event.repository.name }}", "github", "{{ github"), "\\", "")
         REPOSITORY      = repo.name
         IMAGE           = replace(replace("\\$github.event.repository.name }}", "github", "{{ github"), "\\", "")
+        TIMEOUT         = "${var.gha_timeout}s"
       }
     ]
   ])

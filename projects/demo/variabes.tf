@@ -38,3 +38,9 @@ variable "project_id" {
   type        = string
   default     = "flow-platform"
 }
+
+variable "gha_timeout" {
+  description = "Github action timeout in seconds."
+  type        = number
+  default     = 120
+}
